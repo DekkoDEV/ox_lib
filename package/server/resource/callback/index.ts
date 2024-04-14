@@ -1,6 +1,6 @@
 import { cache } from '../cache';
 
-const activeEvents: Record<string, (...args) => void> = {};
+const activeEvents: Record<string, (...args: any[]) => void> = {};
 
 onNet(`__ox_cb_${cache.resource}`, (key: string, ...args: any) => {
   const resolve = activeEvents[key];
@@ -25,13 +25,13 @@ export function triggerClientCallback<T = unknown>(
   });
 }
 
-export function onClientCallback(eventName: string, cb: (playerId: number, ...args) => any) {
-  onNet(`__ox_cb_${eventName}`, (resource: string, key: string, ...args) => {
+export function onClientCallback(eventName: string, cb: (playerId: number, ...args: any[]) => any) {
+  onNet(`__ox_cb_${eventName}`, async (resource: string, key: string, ...args: any[]) => {
     const src = source;
     let response: any;
 
     try {
-      response = cb(src, ...args);
+      response = await cb(src, ...args);
     } catch (e: any) {
       console.error(`an error occurred while handling callback event ${eventName}`);
       console.log(`^3${e.stack}^0`);

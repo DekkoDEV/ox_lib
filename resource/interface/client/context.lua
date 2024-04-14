@@ -6,11 +6,14 @@ local openContextMenu = nil
 ---@field menu? string
 ---@field icon? string | {[1]: IconProp, [2]: string};
 ---@field iconColor? string
+---@field image? string
+---@field progress? number
 ---@field onSelect? fun(args: any)
 ---@field arrow? boolean
 ---@field description? string
 ---@field metadata? string | { [string]: any } | string[]
 ---@field disabled? boolean
+---@field readOnly? boolean
 ---@field event? string
 ---@field serverEvent? string
 ---@field args? any
@@ -31,6 +34,8 @@ local function closeContext(_, cb, onExit)
     if cb then cb(1) end
 
     lib.resetNuiFocus()
+
+    if not openContextMenu then return end
 
     if (cb or onExit) and contextMenus[openContextMenu].onExit then contextMenus[openContextMenu].onExit() end
 
@@ -98,15 +103,12 @@ RegisterNUICallback('clickContext', function(id, cb)
 
     openContextMenu = nil
 
+    SendNUIMessage({ action = 'hideContext' })
     lib.resetNuiFocus()
 
     if data.onSelect then data.onSelect(data.args) end
     if data.event then TriggerEvent(data.event, data.args) end
     if data.serverEvent then TriggerServerEvent(data.serverEvent, data.args) end
-
-    SendNUIMessage({
-        action = 'hideContext'
-    })
 end)
 
 RegisterNUICallback('closeContext', closeContext)
